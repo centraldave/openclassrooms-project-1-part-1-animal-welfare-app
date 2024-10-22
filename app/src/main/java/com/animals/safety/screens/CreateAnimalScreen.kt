@@ -3,29 +3,26 @@ package com.animals.safety.screens
 import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.animals.safety.R
@@ -92,6 +89,7 @@ fun CreateAnimalScreen(
             )
           ) {
             onSaveClick()
+
           }
         }
       ) {
@@ -183,6 +181,7 @@ fun verifyAndCreateAnimal(
   return true
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CreateAnimal(
   modifier: Modifier = Modifier,
@@ -206,7 +205,91 @@ private fun CreateAnimal(
       .verticalScroll(scrollState)
   ) {
     //TODO: A compléter
+    CreateAnimalField(
+      value = name,
+      onValueChange = onNameChanged,
+      label = stringResource(R.string.hint_name),
+      placeholder = "Quel est l'animal ?"
+    )
+
+    CreateAnimalField(
+      value = age,
+      onValueChange = onAgeChanged,
+      label = stringResource(R.string.hint_age),
+      placeholder = "Son age ?"
+    )
+
+    CreateAnimalField(
+      value = weight,
+      onValueChange = onWeightChanged,
+      label = stringResource(R.string.hint_weight),
+      placeholder = "Son poids ?"
+    )
+
+    CreateAnimalField(
+      value = height,
+      onValueChange = onHeightChanged,
+      label = stringResource(R.string.hint_height),
+      placeholder = "Sa taille ?"
+    )
+
+    var expanded by remember { mutableStateOf(false) }
+    var selected by remember { mutableStateOf(Breed.entries[0]) }
+    ExposedDropdownMenuBox(
+      expanded = expanded,
+      onExpandedChange = { expanded = !expanded },
+      modifier = Modifier.fillMaxWidth()
+        .padding(16.dp)
+    ) {
+      TextField(
+        modifier = Modifier
+          .menuAnchor()
+          .fillMaxWidth(),
+        value = selected.name,
+        onValueChange = {},
+        readOnly = true,
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)}
+      )
+      ExposedDropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false }
+      ) {
+        Breed.entries.forEachIndexed { index, breed ->
+          DropdownMenuItem(
+            text = { Text(breed.name) },
+            onClick = {
+              onBreedChanged(breed)
+              expanded = false
+              selected = Breed.entries[index]
+            },
+            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+          )
+        }
+      }
+    }
   }
+}
+
+@Composable
+fun CreateAnimalField(
+  value: String,
+  onValueChange: (String) -> Unit,
+  label: String,
+  placeholder: String
+) {
+  OutlinedTextField(
+    value = value,
+    onValueChange = onValueChange,
+    label = { Text(label) },
+    placeholder = { Text(placeholder) },
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(16.dp),
+    singleLine = true,
+    keyboardOptions = KeyboardOptions.Default.copy(
+      imeAction = ImeAction.Next
+    )
+  )
 }
 
 @Preview(showBackground = true)
